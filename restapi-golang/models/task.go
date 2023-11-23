@@ -7,4 +7,5 @@ type Task struct {
 	Title     string `json:"title"`
 	Completed string `json:"completed"`
 	CreatedAt time.Time
+	UserID    uint
 }

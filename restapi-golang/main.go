@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example.com/RestAPIgo/controllers"
+	"example.com/RestAPIgo/Routes"
 	"example.com/RestAPIgo/models"
 	"github.com/gin-gonic/gin"
 )
@@ -11,11 +11,9 @@ func main() {
 
 	models.ConnectDatabase()
 
-	r.GET("/tasks", controllers.FindTasks)
-	r.POST("/tasks", controllers.CreateTask)
-	r.GET("/tasks/:id", controllers.FindTask)
-	r.PATCH("/tasks/:id", controllers.UpdateTask)
-	r.DELETE("/tasks/:id", controllers.DeleteTask)
+	Routes.ConfigTaskRouter(r)
+	Routes.ConfigUserRouter(r)
+	Routes.ConfigAuthRouter(r)
 
 	err := r.Run()
 	if err != nil {
