@@ -50,7 +50,7 @@ func createToken(userID uint) (string, error) {
 		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Thời gian hết hạn của token (24 giờ)
 	})
 
-	tokenString, err := token.SignedString([]byte("your-secret-key")) // Sử dụng cùng secret key như trước
+	tokenString, err := token.SignedString([]byte("secretKey"))
 	if err != nil {
 		return "", err
 	}
