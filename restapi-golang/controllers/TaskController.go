@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"example.com/RestAPIgo/models"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -11,8 +12,8 @@ type CreateTaskInput struct {
 	Title     string `json:"title" binding:"required"`
 	Completed string `json:"completed" binding:"required"`
 	CreatedAt string `json:"createdAt" binding:"required"`
-	UserID    uint   `json:"userId" binding:"required"`
 }
+
 type UpdateTaskInput struct {
 	Title     string `json:"title"`
 	Completed string `json:"completed"`
@@ -50,14 +51,22 @@ func CreateTask(c *gin.Context) {
 	}
 
 	createdAt, err := time.Parse("2006-01-02", input.CreatedAt)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
 		return
 	}
 
+	// Get UserID from token
+	userID, exists := getUserIDFromToken(c)
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	var user models.User
-	if err := models.DB.Where("id = ?", input.UserID).First(&user).Error; err != nil {
+
+	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found!"})
 		return
 	}
@@ -68,6 +77,7 @@ func CreateTask(c *gin.Context) {
 		CreatedAt: createdAt,
 		UserID:    user.ID,
 	}
+
 	models.DB.Create(&task)
 
 	responseData := gin.H{
@@ -79,6 +89,34 @@ func CreateTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": responseData})
+}
+
+func getUserIDFromToken(c *gin.Context) (uint, bool) {
+	tokenString := c.GetHeader("Authorization")
+
+	if tokenString == "" {
+		return 0, false
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secretKey"), nil
+	})
+
+	if err != nil || !token.Valid {
+		return 0, false
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, false
+	}
+
+	userID, ok := claims["userID"].(float64)
+	if !ok {
+		return 0, false
+	}
+
+	return uint(userID), true
 }
 
 func FindTask(c *gin.Context) {

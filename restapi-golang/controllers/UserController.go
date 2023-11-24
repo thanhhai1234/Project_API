@@ -13,7 +13,6 @@ type UserResponse struct {
 	Password string `json:"password"`
 }
 
-// CreateUser creates a new user.
 func CreateUser(c *gin.Context) {
 	var user models.User
 
@@ -21,7 +20,7 @@ func CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// Hash mật khẩu trước khi lưu vào cơ sở dữ liệu
+	// Hash the password before saving it to the database
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
@@ -40,6 +39,7 @@ func CreateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": responseData})
 }
+
 func FindUser(c *gin.Context) {
 	var user models.User
 
@@ -67,6 +67,7 @@ func FindUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": userResponses})
 }
+
 func DeleteUser(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {

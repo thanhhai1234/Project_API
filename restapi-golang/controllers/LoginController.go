@@ -28,13 +28,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Kiểm tra mật khẩu
+	// Check password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
 	}
 
-	// Tạo JWT
+	// Create JWT
 	token, err := createToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
@@ -47,7 +47,7 @@ func Login(c *gin.Context) {
 func createToken(userID uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
-		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Thời gian hết hạn của token (24 giờ)
+		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Token expiration time (24 hours)
 	})
 
 	tokenString, err := token.SignedString([]byte("secretKey"))
