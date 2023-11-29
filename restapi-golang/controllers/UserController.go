@@ -8,11 +8,12 @@ import (
 )
 
 type UserResponse struct {
-	ID       uint   `json:"id"`
-	Name     string `json:"name"`
-	Password string `json:"password"`
+	ID       uint   `json:"ID"`
+	Name     string `json:"Name"`
+	Password string `json:"Password"`
 }
 
+// CreateUser creates a new user based on the JSON data sent from the client.
 func CreateUser(c *gin.Context) {
 	var user models.User
 
@@ -26,11 +27,9 @@ func CreateUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
-
 	user.Password = string(hashedPassword)
 
 	models.DB.Create(&user)
-
 	responseData := gin.H{
 		"id":       user.ID,
 		"name":     user.Name,
@@ -40,6 +39,7 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": responseData})
 }
 
+// FindUser returns details of a user based on ID
 func FindUser(c *gin.Context) {
 	var user models.User
 
@@ -51,6 +51,7 @@ func FindUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+// FindUsers returns a list of all users in the database
 func FindUsers(c *gin.Context) {
 	var users []models.User
 	var userResponses []UserResponse
@@ -68,6 +69,7 @@ func FindUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": userResponses})
 }
 
+// DeleteUser deletes a user based on ID.
 func DeleteUser(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {

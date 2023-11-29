@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ConfigTaskRouter configures routes related to TASKS in the application
 func ConfigTaskRouter(r *gin.Engine) {
 	r.GET("/tasks", controllers.FindTasks)
 	r.POST("/tasks", controllers.CreateTask)
@@ -13,6 +14,7 @@ func ConfigTaskRouter(r *gin.Engine) {
 	r.DELETE("/tasks/:id", controllers.DeleteTask)
 }
 
+// ConfigUserRouter configures routes related to USERS in the application
 func ConfigUserRouter(r *gin.Engine) {
 	r.POST("/users", controllers.CreateUser)
 	r.GET("/users/:id", controllers.FindUser)
@@ -20,6 +22,7 @@ func ConfigUserRouter(r *gin.Engine) {
 	r.DELETE("/users/:id", controllers.DeleteUser)
 }
 
+// ConfigAuthRouter configures routes related to AUTHENTICATION in the application.
 func ConfigAuthRouter(r *gin.Engine) {
 	r.POST("/login", controllers.Login)
 }
