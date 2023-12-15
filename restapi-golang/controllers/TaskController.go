@@ -15,15 +15,7 @@ type CreateTaskInput struct {
 }
 
 type UpdateTaskInput struct {
-	Title     string `json:"Title"`
-	Completed string `json:"Completed"`
-}
-
-func FindTasks(c *gin.Context) {
-	var tasks []models.Task
-	models.DB.Find(&tasks)
-
-	c.JSON(http.StatusOK, gin.H{"data": tasks})
+	Title string `json:"Title"`
 }
 
 // DetermineCompletedStatus determines the completion status of a task based on its creation time and the current time.
@@ -38,7 +30,7 @@ func DetermineCompletedStatus(createdAt time.Time) string {
 	} else if createdAtString > nowLocalString {
 		return "Open"
 	} else {
-		return "Due"
+		return "Due "
 	}
 }
 
@@ -81,7 +73,7 @@ func CreateTask(c *gin.Context) {
 		"id":        task.ID,
 		"title":     task.Title,
 		"completed": task.Completed,
-		"createdAt": task.CreatedAt.Format("2006-01-02"),
+		"createdAt": task.CreatedAt,
 		"userID":    user.ID,
 	}
 	c.JSON(http.StatusOK, gin.H{"data": responseData})
@@ -90,11 +82,10 @@ func CreateTask(c *gin.Context) {
 // getUserIDFromToken extracts the user's ID from the authentication token.
 func getUserIDFromToken(c *gin.Context) (uint, bool) {
 	tokenString := c.GetHeader("Authorization")
-
 	if tokenString == "" {
 		return 0, false
 	}
-
+	// parse the JWT string into an object
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secretKey"), nil
 	})
@@ -114,6 +105,14 @@ func getUserIDFromToken(c *gin.Context) (uint, bool) {
 	}
 
 	return uint(userID), true
+}
+
+// FindTasks returns a list of all tasks in the database
+func FindTasks(c *gin.Context) {
+	var tasks []models.Task
+	models.DB.Find(&tasks)
+
+	c.JSON(http.StatusOK, gin.H{"data": tasks})
 }
 
 // FindTask returns details of a task based on ID
@@ -146,7 +145,7 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	models.DB.Model(task).Updates(input)
+	models.DB.Model(&task).Updates(input)
 
 	c.JSON(http.StatusOK, gin.H{"data": task})
 }
@@ -156,6 +155,7 @@ func DeleteTask(c *gin.Context) {
 	var task models.Task
 	if err := models.DB.Where("id = ?", c.Param("id")).First(&task).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
 	}
 
 	models.DB.Delete(&task)

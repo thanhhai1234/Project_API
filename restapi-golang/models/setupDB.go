@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// DB maintain connection to the database
 var DB *gorm.DB
 
 // ConnectDatabase opens a connection to the SQLite database
