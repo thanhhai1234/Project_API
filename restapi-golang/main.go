@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+
+	// Create a default Gin object to handle HTTP requests
 	r := gin.Default()
 
 	models.ConnectDatabase()
