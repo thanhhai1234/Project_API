@@ -12,6 +12,9 @@ func ConfigTaskRouter(r *gin.Engine) {
 	r.GET("/tasks/:id", controllers.FindTask)
 	r.PATCH("/tasks/:id", controllers.UpdateTask)
 	r.DELETE("/tasks/:id", controllers.DeleteTask)
+	// configures routes for task statistics
+	r.GET("/tasks/stats", controllers.StatTasks)
+	r.GET("/tasks/status/:status", controllers.FindTasksByStatus)
 }
 
 // ConfigUserRouter configures routes related to USERS in the application

@@ -45,7 +45,7 @@ func Login(c *gin.Context) {
 func createToken(userID uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
-		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Token expiration time (24 hours)
+		"exp":    time.Now().Add(time.Hour * 24), // Token expiration time (24 hours)
 	})
 
 	tokenString, err := token.SignedString([]byte("secretKey"))

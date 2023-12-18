@@ -30,7 +30,7 @@ func DetermineCompletedStatus(createdAt time.Time) string {
 	} else if createdAtString > nowLocalString {
 		return "Open"
 	} else {
-		return "Due "
+		return "Due"
 	}
 }
 
@@ -110,7 +110,7 @@ func getUserIDFromToken(c *gin.Context) (uint, bool) {
 // FindTasks returns a list of all tasks in the database
 func FindTasks(c *gin.Context) {
 	var tasks []models.Task
-	models.DB.Find(&tasks)
+	models.DB.Order("created_at DESC").Find(&tasks)
 
 	c.JSON(http.StatusOK, gin.H{"data": tasks})
 }
@@ -161,4 +161,31 @@ func DeleteTask(c *gin.Context) {
 	models.DB.Delete(&task)
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
+}
+
+// StatTasks returns statistics about tasks (number of Due, Overdue, Open tasks)
+func StatTasks(c *gin.Context) {
+	var stats map[string]int
+	stats = make(map[string]int)
+
+	var dueTasks, overdueTasks, openTasks []models.Task
+
+	models.DB.Where("completed = ?", "Due").Find(&dueTasks)
+	models.DB.Where("completed = ?", "OverDue").Find(&overdueTasks)
+	models.DB.Where("completed = ?", "Open").Find(&openTasks)
+
+	stats["Due"] = len(dueTasks)
+	stats["Overdue"] = len(overdueTasks)
+	stats["Open"] = len(openTasks)
+
+	c.JSON(http.StatusOK, gin.H{"stats": stats})
+}
+
+// FindTasksByStatus returns a list of tasks based on their status (Due, Overdue, Open)
+func FindTasksByStatus(c *gin.Context) {
+	status := c.Param("status")
+	var tasks []models.Task
+	models.DB.Where("completed = ?", status).Order("created_at DESC").Find(&tasks)
+
+	c.JSON(http.StatusOK, gin.H{"data": tasks})
 }
